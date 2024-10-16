@@ -9,6 +9,13 @@ class Human {
 	public:
 };
 
+class Staff {
+	private: 
+
+	public:
+	
+};
+
 class Patient : public Human {
 	private:
 		
