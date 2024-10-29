@@ -64,7 +64,12 @@ void Staff::logIn() {
 				checkPass = 1;
 			}
 			if(checkID && checkPass) {
-				cout << "LOGIN SUCCESS!";
+				cout << "LOGIN SUCCESS! ";
+				cout << "Hello ";
+				while(ss >> split){
+					cout << split << ' ';
+				}
+				cout << "\nHave a nice day!\n";
 				return;
 			}
 		}
