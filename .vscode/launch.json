@@ -9,16 +9,17 @@
       "stopAtEntry": false,
       "externalConsole": true,
       "cwd": "d:/Coding/Code_C_Cpp/OOP_HOSPITAL_vscode",
-      "program": "d:/Coding/Code_C_Cpp/OOP_HOSPITAL_vscode/build/Debug/outDebug",
+      "program": "d:/Coding/Code_C_Cpp/OOP_HOSPITAL_vscode/output/main.exe",
       "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
+      "miDebuggerPath": "C:/vscodex/mingw64/bin/gdb.exe",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
           "text": "-enable-pretty-printing",
           "ignoreFailures": true
         }
-      ]
+      ],
+      "preLaunchTask": "Compile"
     }
   ]
 }

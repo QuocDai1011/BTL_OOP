@@ -1,25 +1,76 @@
-#include "HospitalData.hpp"
+#include "./HospitalData.hpp"
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+using namespace std;
 
 Human::Human() {
-	name = "";
-	gender = 0;
-	phoneNumber = "";
+    name = "";
+    gender = 0;
+    phoneNumber = "";
 }
+
+// Định nghĩa hàm khởi tạo có tham số của lớp Human
 Human::Human(string name, int gender, string phoneNumber) {
-	this->name = name;
-	this->gender = gender;
-	this->phoneNumber = phoneNumber;
+    this->name = name;
+    this->gender = gender;
+    this->phoneNumber = phoneNumber;
 }
 
+// HospitalData.cpp
+
+// Định nghĩa hàm khởi tạo không tham số
 Staff::Staff() : Human() { 
-	ID = "";
-	address = "";
+    ID = "";
+    address = "";
+    pass = "";
 }
 
-Staff::Staff(string name, int gender, string phoneNumber, string ID, string address)
-	: Human(name, gender, phoneNumber) { 
-	this->ID = ID;
-	this->address = address;
+// Định nghĩa hàm khởi tạo có tham số của lớp Staff
+Staff::Staff(string name, int gender, string phoneNumber, string ID, string address, string pass)
+    : Human(name, gender, phoneNumber) { 
+    this->ID = ID;
+    this->address = address;
+    this->pass = pass;
+}
+
+// Định nghĩa hàm logIn của lớp Staff
+void Staff::logIn() {
+    cout << setw(50) << "__________" << endl;
+    cout << setw(50) << "| LOGIN  |" << endl;
+    cout << setw(50) << "|________|" << endl;
+	cout << "Enter ID: ";
+	cin >> this->ID;
+	cin.ignore();
+	cout << "Enter Password: ";
+	cin >> this->pass;
+	/*cout << this->ID << ' ' << this->pass;*/
+	ifstream fs("D:\\Coding\\Code_C_Cpp\\OOP_HOSPITAL_vscode\\Information\\informationStaff.txt", ios::in);
+	if(!fs.is_open()) {
+		cout << "Cannot open file informationStaff.txt";
+	}else {
+		for(int i=0; i<3; i++) {
+			string str;
+			getline(fs, str);
+			stringstream ss(str);
+			string split;
+			ss >> split; // ID
+			int checkID = 0, checkPass = 0;
+			if(split == this->ID){
+				checkID = 1;
+			}
+			ss >> split;
+			if(split == this->pass){
+				checkPass = 1;
+			}
+			if(checkID && checkPass) {
+				cout << "LOGIN SUCCESS!";
+				return;
+			}
+		}
+		cout << "LOGIN FAILED!";
+		return;
+	}
 }
 
 Patient::Patient() : Human() {
@@ -91,4 +142,4 @@ Bill::Bill(string id, string name, string treatment, string medicals, string tot
 	statusPay = status;
 	dateOfBill = date;
 }
- 
+

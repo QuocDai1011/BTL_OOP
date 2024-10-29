@@ -1,9 +1,3 @@
-#ifndef HOSPITALFUNCTIONS_H
-#define HOSPITALFUNCTIONS_H
-
-#include "HospitalData.hpp"
+#pragma once
 
 
-
-
-#endif

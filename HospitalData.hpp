@@ -1,6 +1,5 @@
-#ifndef HOSPITALDATA_H
-#define HOSPITALDATA_H
-
+#ifndef HOSPITALDATA_HPP
+#define HOSPITALDATA_HPP
 #include <string>
 using namespace std;
 
@@ -24,9 +23,11 @@ class Staff : public Human {
 	private: 
 		string ID;
 		string address;
+		string pass;
 	public:
 		Staff();  
-		Staff(string name, int gender, string phoneNumber, string ID, string address);	
+		Staff(string name, int gender, string phoneNumber, string ID, string address, string pass);	
+		void logIn();
 };
 
 class Patient : public Human {
