@@ -1,0 +1,12 @@
+23V|Paracetamol (Acetaminophen)|17500|vien|
+11B|Ibuprofen|880|vien|
+59Z|Amoxicillin|2500|vien|
+55A|Cefuroxime|120000|lo(50ml)|
+82J|Loratadine|840|vien|
+35D|Omeprazole 40mg|6000|vien|
+99T|Metformin 500mg(100 vien)|1500|vien|
+58G|Loperamide 2mg|640|vien|
+83C|Salbutamol (Ventolin 100mcg)|150000|ong(200 lieu)|
+37L|Diazepam (10mg/2ml)|15000|ong tiem|
+17L|Panadol|1000|vien|
+53U|Hapacol|4000|goi|
