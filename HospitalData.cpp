@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <fstream>
 #include <cstdlib>
+#include <cstring>
 using namespace std;
 
 Human::Human() {
@@ -115,15 +116,20 @@ Patient::Patient() : Human() {
 	dateOfHospital = {0, 0, 0};
 	currentStatus = "";
     IDdoctor = "";
+    IDmedicine = "";
+    quantity = "";
 }
 
-Patient::Patient(string name, int gender, string phoneNumber, Date dateOfBirth, string address, Date dateOfHospital, string currentStatus, string IDdoctor)
+Patient::Patient(string name, int gender, string phoneNumber, Date dateOfBirth, 
+string address, Date dateOfHospital, string currentStatus, string IDdoctor, string IDmedicine, string quantity)
 	: Human(name, gender, phoneNumber) {
 	this->dateOfBirth = dateOfBirth;
 	this->address = address;
 	this->dateOfHospital = dateOfHospital;
 	this->currentStatus = currentStatus;	
     this->IDdoctor = IDdoctor;
+    this->IDmedicine = IDmedicine;
+    
 }
 
 Date Patient::getDateOfBirth() {
@@ -180,6 +186,7 @@ istream& operator>>(istream& is, Patient *p) {
     cout << "Enter the patient's name: ";
     is >> ws; // Xóa khoảng trắng thừa
     getline(is, p->name);
+    p->name = nameFormat(p->name);
 
     cout << "Enter patient's gender (0: FEMALE || 1: MALE): ";
     do {
@@ -195,7 +202,7 @@ istream& operator>>(istream& is, Patient *p) {
     is >> ws; // Xóa khoảng trắng thừa
     getline(is, p->phoneNumber);
 
-    cout << "Enter the patient's date of birth (dd mm yy): ";
+    cout << "Enter the patient's date of birth (dd mm yyyy): ";
     Date birth;
     do {
         is >> birth.day >> birth.month >> birth.year;
@@ -204,7 +211,7 @@ istream& operator>>(istream& is, Patient *p) {
             cout << "Enter date of birth failed. Try again: ";
         }
     }while(!validationDate(birth));
-    cout << "Enter the patient's admission date (dd mm yy): ";
+    cout << "Enter the patient's admission date (dd mm yyyy): ";
     Date admission;
     do{
         is >> admission.day >> admission.month >> admission.year;
@@ -219,16 +226,34 @@ istream& operator>>(istream& is, Patient *p) {
     cout << "Enter the province where the patient resides: ";
     string province;
     getline(is, province);
+    province = nameFormat(province);
     p->setAddress(province);
 
     cout << "Enter the patient's current condition: ";
     string status;
     getline(is, status);
     p->setCurrentStatus(status);
+    cout << "-------------------- LIST OF DOCTORS ON DUTY --------------------\n";
+    Doctor dt;
+    dt.readDoctorStatus();
     cout << "Enter the ID of the doctor: ";
     string ID;
     cin >> ID;
     p->setIDdoctor(ID);
+    system("CLS");
+    cout << "-------------------------- DOCTOR CHOOSES MEDICINE FOR PATIENT --------------------------\n";
+    cout << "The patient's name: " << p->name << endl;
+    cout << "The patient's date of birth: " << birth.day << "/" << birth.month << "/" << birth.year << endl;
+    cout << "The patient's current status: " << status << endl;
+    Prescription pre;
+    pre.readFromFile();
+    cout << "Enter medication according to patient ID: ";
+    is >> ws;
+    getline(is, p->IDmedicine);
+    p->IDmedicine = removeSpace(p->IDmedicine);
+    cout << "Enter the quantity of medicine corresponding to the type of medicine: ";
+    getline(is, p->quantity);
+    p->quantity = removeSpace(p->quantity);
     cout << "___________________________________________________________________________________\n";
     return is;
 }
@@ -270,7 +295,9 @@ void Patient::writeToFile() {
     fs << this->dateOfHospital.day << "/" << this->dateOfHospital.month << "/" << this->dateOfHospital.year << "|";
     fs << this->currentStatus << "|";
     fs << this->address << "|";
-    fs << this->IDdoctor << "\n";
+    fs << this->IDdoctor << "|";
+    fs << this->IDmedicine << "|";
+    fs << this->quantity << "|\n";
     fs.close();
 }
 
@@ -329,6 +356,41 @@ void Patient::readInFormationByPhoneNumber(const string &phoneNumberCheck, int &
     }
     fs.close();
 } 
+
+void Patient::updateInformation() {
+    cout << "Update the patient's admission date (dd mm yyyy): ";
+    Date doa;
+    cin >> doa.day >> doa.month >> doa.year;
+    this->dateOfHospital = doa;
+    cout << "Update the patient's current status: ";
+    string temp;
+    cin.ignore();
+    getline(cin, temp);
+    this->currentStatus = temp;
+    cout << "-------------------- LIST OF DOCTORS ON DUTY --------------------\n";
+    Doctor dt;
+    dt.readDoctorStatus();
+    cout << "Enter the ID of the doctor: ";
+    string ID;
+    cin >> ID;
+    this->IDdoctor = ID;
+    system("CLS");
+    cout << "-------------------------- DOCTOR CHOOSES MEDICINE FOR PATIENT --------------------------\n";
+    cout << "The patient's name: " << this->name << endl;
+    cout << "The patient's date of birth: " << this->dateOfBirth.day << "/" << this->dateOfBirth.month << "/" << this->dateOfBirth.year << endl;
+    cout << "The patient's current status: " << this->currentStatus << endl;
+    Prescription pre;
+    pre.readFromFile();
+    cout << "Enter medication according to patient ID: ";
+    cin.ignore();
+    getline(cin, this->IDmedicine);
+    this->IDmedicine = removeSpace(this->IDmedicine);
+    cout << "Enter the quantity of medicine corresponding to the type of medicine: ";
+    getline(cin, this->quantity);
+    this->quantity = removeSpace(this->quantity);
+    cout << "___________________________________________________________________________________\n";
+  
+}
 
 
 Doctor::Doctor() : Human() {
@@ -409,6 +471,69 @@ void Doctor::readFromFile(int index) {
     this->experience = stoi(word);
     getline(ss, word, '|'); // word la trang thai lam viec
     this->working = stoi(word);
+    fs.close();
+}
+
+void Doctor::readDoctorStatus() {
+    ifstream fs("informationDoctor.txt", ios::in);
+    if(!fs.is_open()) {
+        cout << "Cannot open informationDoctor.txt\n";
+        return;
+    }
+    string line;
+    while(getline(fs, line)) {
+        stringstream ss(line);
+        string split;
+        getline(ss, split, '|'); // split la ID
+        string id = split;
+        getline(ss, split, '|'); // split la ten
+        string name = split;
+        getline(ss, split, '|'); // split la gender
+        int gender = stoi(split);
+        getline(ss, split, '|'); // split la sdt
+        string phoneNumber = split;
+        getline(ss, split, '|'); // split la so nam kinh nghiem
+        getline(ss, split, '|'); // split la status
+        int status = stoi(split);
+        if(status == 1) {
+            cout << "The doctor's ID: " << id << endl;
+            cout << "The doctor's name: " << name << endl;
+            cout << "The doctor's gender: ";
+            if(gender == 1) cout << "MALE\n";
+            else cout << "FEMALE\n";
+            cout << "The doctor's phone number: " << phoneNumber << endl;
+            cout << "The doctor's status: YES\n";
+            cout << "______________________________________________________\n";
+        }
+    }
+    fs.close();
+}
+void Doctor::readFromFileByID(const string &IDcheck, int &check){
+    check = 0;
+     ifstream fs("informationDoctor.txt", ios::in);
+    if(!fs.is_open()) {
+        cout << "Cannot open informationDoctor.txt\n";
+        return;
+    }
+    string line;
+    while(getline(fs, line)) {
+        stringstream ss(line);
+        string split;
+        getline(ss, split, '|'); // ID
+        if(split == IDcheck) {
+            this->ID = split;
+            getline(ss, split, '|'); //name
+            this->name = split;
+            getline(ss, split, '|'); //gender
+            this->gender = stoi(split);
+            getline(ss, split, '|'); // sdt;
+            this->phoneNumber = split;
+            getline(ss, split, '|'); //experience
+            this->experience = stoi(split);
+            getline(ss, split, '|'); //status
+            this->working = stoi(split);
+        }
+    }
     fs.close();
 }
 
@@ -499,7 +624,7 @@ double Prescription::getPriceByIDFromFile(string ID) {
     string line;
     while(getline(fs, line)){
         stringstream ss(line);
-        string split;
+        string split; 
         getline(ss, split, '|'); //split la ID thuoc
         if(split == ID) {
             getline(ss, split, '|'); // split la ten thuoc

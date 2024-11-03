@@ -64,10 +64,13 @@ class Patient : public Human {
 		Date dateOfHospital; // ngay nhap vien
 		string currentStatus; // tinh trang hien tai
 		string IDdoctor; // ID bac si kham benh
+		string IDmedicine; // ID thuoc
+		string quantity; //so luong thuoc.
 	public:
 		Patient();
 		Patient(string name, int gender, string phoneNumber, Date dateOfBirth, 
-		string address, Date dateOfHospital, string currentStatus, string IDdoctor);
+		string address, Date dateOfHospital, string currentStatus, 
+		string IDdoctor, string IDmedicine, string quantity);
 		Date getDateOfBirth();
 		string getAddress();
 		Date getDateOfHospital();
@@ -91,6 +94,7 @@ class Patient : public Human {
 		friend ostream& operator<<(ostream& os, Patient *p);
 		void writeToFile();
 		void readInFormationByPhoneNumber(const string &phoneNumberCheck, int &check);
+		void updateInformation();
 }; 
 
 class Doctor : public Human {
@@ -118,6 +122,8 @@ class Doctor : public Human {
 		friend ostream& operator<<(ostream& os, Doctor *d);
 		//
 		void readFromFile(int index);
+		void readDoctorStatus();
+		void readFromFileByID(const string &IDcheck, int &check);
 };
 
 class Prescription {
