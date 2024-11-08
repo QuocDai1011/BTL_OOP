@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include "./HospitalData.hpp"
 #include "./HospitalFunction.hpp"
 using namespace std;
@@ -98,9 +99,19 @@ int main() {
                 break;
             }
             case 5: {
+                system("CLS");
+                string phone;
+                cin.ignore();
+                cout << "Enter the patient's phone number for billing: "<<endl;
+                getline(cin, phone);
 
+                Bill bill(phone);
+                bill.loadMedicineList();      // Đọc thông tin thuốc từ file
+                bill.calculateTotalCost();    // Tính tổng chi phí thuốc
+                bill.displayBill();           // Hiển thị hóa đơn
                 break;
             }
+
             case 0: {
                 break;
             }

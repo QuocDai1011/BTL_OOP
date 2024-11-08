@@ -5,6 +5,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <cstring>
+#include <vector>
 using namespace std;
 
 Human::Human() {
@@ -659,22 +660,181 @@ string Prescription::getDosageFormFromFile(string ID) {
 }
 
 Bill::Bill() {
-	ID = "";
-	nameOfPatient = "";
-	treatmentCost = "0VND";
-	medicalsCost = "0VND";
-	totalCost = "0VND";
-	statusPay = "0"; 
-	dateOfBill = {0, 0, 0}; 
+    ID = "";
+    nameOfPatient = "";
+    treatmentCost = "0VND";
+    medicalsCost = "0VND";
+    totalCost = "0VND";
+    statusPay = "0";
+    dateOfBill = {0, 0, 0};
 }
 
 Bill::Bill(string id, string name, string treatment, string medicals, string total, string status, Date date) {
-	ID = id;
-	nameOfPatient = name;
-	treatmentCost = treatment;
-	medicalsCost = medicals;
-	totalCost = total;
-	statusPay = status;
-	dateOfBill = date;
+    ID = id;
+    nameOfPatient = name;
+    treatmentCost = treatment;
+    medicalsCost = medicals;
+    totalCost = total;
+    statusPay = status;
+    dateOfBill = date;
 }
+
+Bill::Bill(string phone) : patientPhone(phone) {
+    treatmentCost = "0VND";
+    medicalsCost = "0VND";
+    totalCost = "0VND";
+    statusPay = "0";
+    dateOfBill = {0, 0, 0};
+}
+
+void Bill::loadMedicineList() {
+    ifstream file("informationPatient.txt");
+    if (!file.is_open()) {
+        cout << "Cannot open informationPatient.txt.\n";
+        return;
+    }
+
+    string line;
+    while (getline(file, line)) {
+        cout << "Information of Patient: " << line << endl; // Gỡ lỗi
+        istringstream iss(line);
+        string phone, medicineIDList, quantityList;
+
+        getline(iss, phone, '|');
+        cout << "ID Patient: " << phone << endl; // Gỡ lỗi
+        if (phone == patientPhone) {
+            for (int i = 0; i < 7; i++) getline(iss, phone, '|'); // Bỏ qua các thông tin khác
+            getline(iss, medicineIDList, '|');
+            getline(iss, quantityList, '|');
+            cout <<"-------------------------------------------------------------"<<endl;
+            cout << "Medicine ID List of Patient: " << medicineIDList << endl; // Gỡ lỗi
+            cout << "Quantity for each medicine: " << quantityList << endl; // Gỡ lỗi
+            cout <<"-------------------------------------------------------------"<<endl;
+
+            if (!medicineIDList.empty() && !quantityList.empty()) {
+                istringstream idStream(medicineIDList);
+                istringstream qtyStream(quantityList);
+
+                string id, qty;
+                cout <<"ID List of available hospital medications: "<<endl;
+                cout << "----------------------------------------"<<endl;
+                while (getline(idStream, id, ',') && getline(qtyStream, qty, ',')) {
+                    if (!id.empty() && !qty.empty()) {
+                        try {
+                            medicineList.push_back(make_pair(id, stoi(qty)));
+                        } catch (const invalid_argument &e) {
+                            cout << "Invalid argument: " << e.what() << endl;
+                        } catch (const out_of_range &e) {
+                            cout << "Out of range: " << e.what() << endl;
+                        }
+                    }
+                }
+            }
+            break;
+        }
+    }
+    file.close();
+}
+
+
+void Bill::calculateTotalCost() {
+    double totalCostDouble = 0.0;
+    ifstream medicineFile("medicineAndPrice.txt");
+    if (!medicineFile.is_open()) {
+        cout << "Cannot open medicineAndPrice.txt\n";
+        return;
+    }
+
+    string line;
+    while (getline(medicineFile, line)) {
+        istringstream iss(line);
+        string id, name, price, unit;
+
+        getline(iss, id, '|');
+        getline(iss, name, '|');
+        getline(iss, price, '|');
+        getline(iss, unit, '|');
+        cout << "ID: " << id << ", Price: " << price << endl; // Gỡ lỗi
+        cout <<"-------------------------------------------------------------"<<endl;
+        if (!id.empty() && !price.empty()) {
+            try {
+                double priceDouble = stod(price);
+                for (auto &medicine: medicineList) {
+                    if (medicine.first == id) {
+                        totalCostDouble += priceDouble * medicine.second;
+                    }
+                }
+            } catch (const invalid_argument &e) {
+                cout << "Invalid argument: " << e.what() << endl;
+            } catch (const out_of_range &e) {
+                cout << "Out of range: " << e.what() << endl;
+            }
+        }
+    }
+    medicineFile.close();
+
+    totalCost = to_string(totalCostDouble) + " VND";
+}
+
+void Bill::displayBill() {
+    cout << "========== HOA DON ==========" << endl;
+    cout << "So dien thoai benh nhan: " << patientPhone << endl;
+    cout << "--------------------------------" << endl;
+
+    ifstream medicineFile("medicineAndPrice.txt");
+    string line;
+
+    if (!medicineFile.is_open()) {
+        cout << "Cannot open medicineAndPrice.txt\n";
+        return;
+    }
+
+    cout << left << setw(15) << "ID Thuoc" << " | " 
+         << left << setw(30) << "Ten Thuoc" << " | " 
+         << right << setw(15) << "Don gia" << " | " 
+         << right << setw(10) << "So luong" << " | " 
+         << right << setw(15) << "Thanh tien" << endl;
+    cout << "--------------------------------------------------------------------------------------------" << endl;
+
+    while (getline(medicineFile, line)) {
+        istringstream iss(line);
+        string id, name, price, unit;
+
+        getline(iss, id, '|');
+        getline(iss, name, '|');
+        getline(iss, price, '|');
+        getline(iss, unit, '|');
+
+        if (!id.empty() && !price.empty()) {
+            try {
+                double priceDouble = stod(price);
+                for (auto &medicine : medicineList) {
+                    if (medicine.first == id) {
+                        double cost = priceDouble * medicine.second;
+                        cout << left << setw(15) << id << " | " 
+                             << left << setw(30) << name << " | " 
+                             << right << setw(15) << std::fixed << std::setprecision(2) << price << " | " 
+                             << right << setw(10) << medicine.second << " | " 
+                             << right << setw(15) << std::fixed << std::setprecision(2) << cost << endl;
+                    }
+                }
+            } catch (const invalid_argument &e) {
+                cout << "Invalid argument: " << e.what() << endl;
+            } catch (const out_of_range &e) {
+                cout << "Out of range: " << e.what() << endl;
+            }
+        }
+    }
+    medicineFile.close();
+    cout << "--------------------------------" << endl;
+    cout << "Tong chi phi: " << totalCost << endl;
+
+    int totalCostInt = stoi(totalCost);
+    cout << "Thanh chu: ";
+    docso(totalCostInt);
+    cout << endl;
+    cout << "=================================" << endl;
+}
+
+
 
