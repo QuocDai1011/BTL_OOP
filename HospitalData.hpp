@@ -147,8 +147,6 @@ class Bill {
 private:
     string ID;
     string nameOfPatient; // tên của bệnh nhân
-    string treatmentCost; // chi phí điều trị (chuỗi, đơn vị là VND, ví dụ: "300000VND")
-    string medicalsCost; // chi phí thuốc (chuỗi, đơn vị là VND)
     string totalCost; // tổng chi phí
     string statusPay; // tình trạng thanh toán (0 là chưa thanh toán, 1 là đã thanh toán)
     Date dateOfBill; // ngày tạo hóa đơn
@@ -156,7 +154,7 @@ private:
     vector<pair<string, int>> medicineList; // danh sách thuốc (ID thuốc và số lượng)
 public:
     Bill();
-    Bill(string ID, string nameOfPatient, string treatmentCost, string medicalsCost, string totalCost, string statusPay, Date dateOfBill);
+    Bill(string ID, string nameOfPatient, string totalCost, string statusPay, Date dateOfBill);
     Bill(string phone);
 	void loadMedicineList(); // Đọc danh sách thuốc từ file informationPatient.txt 
     void calculateTotalCost(); // Tính toán tổng tiền thuốc 

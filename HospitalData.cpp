@@ -662,26 +662,20 @@ string Prescription::getDosageFormFromFile(string ID) {
 Bill::Bill() {
     ID = "";
     nameOfPatient = "";
-    treatmentCost = "0VND";
-    medicalsCost = "0VND";
     totalCost = "0VND";
     statusPay = "0";
     dateOfBill = {0, 0, 0};
 }
 
-Bill::Bill(string id, string name, string treatment, string medicals, string total, string status, Date date) {
+Bill::Bill(string id, string name, string total, string status, Date date) {
     ID = id;
     nameOfPatient = name;
-    treatmentCost = treatment;
-    medicalsCost = medicals;
     totalCost = total;
     statusPay = status;
     dateOfBill = date;
 }
 
 Bill::Bill(string phone) : patientPhone(phone) {
-    treatmentCost = "0VND";
-    medicalsCost = "0VND";
     totalCost = "0VND";
     statusPay = "0";
     dateOfBill = {0, 0, 0};
@@ -696,12 +690,10 @@ void Bill::loadMedicineList() {
 
     string line;
     while (getline(file, line)) {
-        cout << "Information of Patient: " << line << endl; // Gỡ lỗi
         istringstream iss(line);
         string phone, medicineIDList, quantityList;
 
         getline(iss, phone, '|');
-        cout << "ID Patient: " << phone << endl; // Gỡ lỗi
         if (phone == patientPhone) {
             for (int i = 0; i < 7; i++) getline(iss, phone, '|'); // Bỏ qua các thông tin khác
             getline(iss, medicineIDList, '|');
@@ -716,8 +708,6 @@ void Bill::loadMedicineList() {
                 istringstream qtyStream(quantityList);
 
                 string id, qty;
-                cout <<"ID List of available hospital medications: "<<endl;
-                cout << "----------------------------------------"<<endl;
                 while (getline(idStream, id, ',') && getline(qtyStream, qty, ',')) {
                     if (!id.empty() && !qty.empty()) {
                         try {
@@ -754,8 +744,6 @@ void Bill::calculateTotalCost() {
         getline(iss, name, '|');
         getline(iss, price, '|');
         getline(iss, unit, '|');
-        cout << "ID: " << id << ", Price: " << price << endl; // Gỡ lỗi
-        cout <<"-------------------------------------------------------------"<<endl;
         if (!id.empty() && !price.empty()) {
             try {
                 double priceDouble = stod(price);
@@ -777,13 +765,79 @@ void Bill::calculateTotalCost() {
 }
 
 void Bill::displayBill() {
-    cout << "========== HOA DON ==========" << endl;
-    cout << "So dien thoai benh nhan: " << patientPhone << endl;
-    cout << "--------------------------------" << endl;
+    cout << "==============" << setw(30) << "HOA DON" << setw(30) << "==============" << endl;
 
-    ifstream medicineFile("medicineAndPrice.txt");
+    // Đọc thông tin bệnh nhân từ file informationPatient.txt để lấy tên bệnh nhân và ID bác sĩ
+    ifstream patientFile("informationPatient.txt");
     string line;
+    string patientName, doctorID, doctorName, doctorPhone;
 
+    if (!patientFile.is_open()) {
+        cout << "Cannot open informationPatient.txt\n";
+        return;
+    }
+
+    while (getline(patientFile, line)) {
+        istringstream iss(line);
+        string phone, name, status, birthDate, visitDate, symptoms, hometown, docID, medicineID, quantity;
+
+        getline(iss, phone, '|');
+        if (phone == patientPhone) { // Tìm đúng bệnh nhân
+            getline(iss, name, '|');
+            patientName = name; // Lấy tên bệnh nhân
+            getline(iss, status, '|');
+            getline(iss, birthDate, '|');
+            getline(iss, visitDate, '|');
+            getline(iss, symptoms, '|');
+            getline(iss, hometown, '|');
+            getline(iss, docID, '|');
+            doctorID = docID; // Lấy ID bác sĩ
+            break;
+        }
+    }
+    patientFile.close();
+
+    // Đọc thông tin bác sĩ từ file informationDoctor.txt để lấy tên bác sĩ
+    ifstream doctorFile("informationDoctor.txt");
+    string doctorLine;
+
+    if (!doctorFile.is_open()) {
+        cout << "Cannot open informationDoctor.txt\n";
+        return;
+    }
+
+    while (getline(doctorFile, doctorLine)) {
+        istringstream iss(doctorLine);
+        string id, doctorNameTmp, gender, docPhone, unknown, status;
+
+        getline(iss, id, '|');
+        if (id == doctorID) {
+            getline(iss, doctorNameTmp, '|');
+            doctorName = doctorNameTmp; // Lấy tên bác si
+            getline(iss, gender, '|');     
+            getline(iss, docPhone, '|');
+            doctorPhone = docPhone; // Lấy số điện thoại bác sĩ
+            getline(iss, unknown, '|');
+            getline(iss, status, '|');
+            break;
+        }
+    }
+    doctorFile.close();
+
+    // Hiển thị thông tin bệnh nhân và bác sĩ
+    cout << left << setw(10) << "ID benh nhan: " << patientPhone 
+     << setw(10) << ""  
+     << left << setw(10) << "Benh nhan: " << patientName << endl;
+    cout << left << setw(10) << "SDT benh nhan: " << patientPhone
+        << setw(10) << ""  
+        << left << setw(10) << "Bac si: " << doctorName
+        << setw(10) << "" 
+        << left << setw(10) << "SDT Bac si: " << doctorPhone << endl;
+
+    cout << "-------------------------------------------------------------------------------------------------" << endl;
+
+    // Hiển thị danh sách thuốc
+    ifstream medicineFile("medicineAndPrice.txt");
     if (!medicineFile.is_open()) {
         cout << "Cannot open medicineAndPrice.txt\n";
         return;
@@ -794,7 +848,7 @@ void Bill::displayBill() {
          << right << setw(15) << "Don gia" << " | " 
          << right << setw(10) << "So luong" << " | " 
          << right << setw(15) << "Thanh tien" << endl;
-    cout << "--------------------------------------------------------------------------------------------" << endl;
+    cout << "-------------------------------------------------------------------------------------------------" << endl;
 
     while (getline(medicineFile, line)) {
         istringstream iss(line);
@@ -826,6 +880,7 @@ void Bill::displayBill() {
         }
     }
     medicineFile.close();
+
     cout << "--------------------------------" << endl;
     cout << "Tong chi phi: " << totalCost << endl;
 
@@ -835,6 +890,3 @@ void Bill::displayBill() {
     cout << endl;
     cout << "=================================" << endl;
 }
-
-
-
