@@ -94,7 +94,7 @@ class Patient : public Human {
 		friend istream& operator>>(istream& is, Patient *p);
 		friend ostream& operator<<(ostream& os, Patient *p);
 		void writeToFile();
-		void readInFormationByPhoneNumber(const string &phoneNumberCheck, int &check);
+		void readInFormationByPhoneNumber(const string &phoneNumberCheck, int &check, Patient *p);
 		void updateInformation();
 }; 
 

@@ -224,3 +224,14 @@ string removeSpace(string s) {
     }
     return temp;
 }
+
+void getCurrentDate(int &day, int &month, int &year) {
+    // Lấy thời gian hiện tại
+    time_t t = time(0);  // Lấy thời gian hiện tại
+    struct tm* now = localtime(&t);  // Chuyển thời gian thành struct tm
+
+    // Lấy ngày, tháng, năm từ struct tm
+    day = now->tm_mday;         // Ngày hiện tại
+    month = now->tm_mon + 1;    // Tháng hiện tại (tm_mon bắt đầu từ 0, nên cộng thêm 1)
+    year = now->tm_year + 1900; // Năm hiện tại (tm_year bắt đầu từ 1900, nên cộng thêm 1900)
+}

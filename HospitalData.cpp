@@ -5,6 +5,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <cstring>
+#include <conio.h>
 #include <vector>
 using namespace std;
 
@@ -62,8 +63,23 @@ void Staff::logIn(int &login) {
     while (attemptCount--) {
         cout << "Enter ID: ";
         cin >> this->ID;
+        char ch;
         cout << "Enter Password: ";
-        cin >> this->pass;
+        while (true) {
+            ch = _getch(); // Lấy ký tự mà không hiển thị
+            if (ch == 13) { // Kiểm tra nếu người dùng nhấn Enter
+                break;
+            } else if (ch == 8) { // Kiểm tra nếu người dùng nhấn Backspace
+                if (!this->pass.empty()) {
+                    this->pass.pop_back(); // Xóa ký tự cuối cùng trong mật khẩu
+                    cout << "\b \b"; // Xóa dấu * trên màn hình
+                }
+            } else {
+                this->pass += ch; // Thêm ký tự vào mật khẩu
+                cout << "*"; // Hiển thị dấu * cho mỗi ký tự nhập
+            }
+        }
+        cout << endl;
 
         fs.clear(); // Xóa trạng thái EOF (nếu có)
         fs.seekg(0); // Đưa con trỏ tệp về đầu
@@ -212,16 +228,9 @@ istream& operator>>(istream& is, Patient *p) {
             cout << "Enter date of birth failed. Try again: ";
         }
     }while(!validationDate(birth));
-    cout << "Enter the patient's admission date (dd mm yyyy): ";
     Date admission;
-    do{
-        is >> admission.day >> admission.month >> admission.year;
-        p->setDateOfHospital(admission);
-        if(!validationDate(admission)) {
-            cout << "Enter admission date failed. Try again: ";
-        }
-    }while(!validationDate(admission));
-    
+    getCurrentDate(admission.day, admission.month, admission.year);
+    p->setDateOfHospital(admission);
     is.ignore(); // Xóa bộ đệm sau khi nhập admission date
 
     cout << "Enter the province where the patient resides: ";
@@ -260,26 +269,24 @@ istream& operator>>(istream& is, Patient *p) {
 }
 
 ostream& operator<<(ostream& os, Patient *p) {
-    cout << setw(60) << "_____________________________________" << endl;
-    cout << setw(60) << "|     THE PATIENT'S INFORMATION     |" << endl;
-    cout << setw(60) << "|___________________________________|" << endl << endl;
-    cout << "The patien's name: ";
-    os << p->name << endl;
-    cout << "The patien's gender: ";
-    if(p->gender == 0) cout << "FEMALE\n";
-    else cout << "MALE\n";
-    cout << "The patient's telephone number: ";
-    os << p->phoneNumber << endl;
-    cout << "The patient's date of birth: ";
-    os << p->dateOfBirth.day << "/" << p->dateOfBirth.month << "/" << p->dateOfBirth.year << endl;
-    cout << "The patient's admission date: ";
-    os << p->dateOfHospital.day << "/" << p->dateOfHospital.month << "/" << p->dateOfHospital.year << endl;
-    cout << "The patient's address: ";
-    os << p->address << endl;
-    cout << "The patient's current status: ";
-    os << p->currentStatus << endl;
-    cout << "The ID of doctor: ";
-    os << p->IDdoctor << endl;
+    // In tiêu đề bảng
+  
+    // In thông tin bệnh nhân theo các cột
+    os << "| " << setw(20) << left << p->name
+       << "| " << setw(8) << left;
+    if (p->gender == 0) os << "FEMALE";
+    else os << "MALE";
+    string dateBirth = to_string(p->dateOfBirth.day) + "/" + to_string(p->dateOfBirth.month) + "/" + to_string(p->dateOfBirth.year);
+    string dateAmi = to_string(p->dateOfHospital.day) + "/" + to_string(p->dateOfHospital.month) + "/" + to_string(p->dateOfHospital.year);
+    os << "| " << setw(17) << left << p->phoneNumber
+       << "| " << setw(18) << left << dateBirth
+       << "| " << setw(18) << left << dateAmi
+       << "| " << setw(19) << left << p->address
+       << "| " << setw(24) << left << p->currentStatus
+       << "| " << setw(12) << left << p->IDdoctor << " |" << endl;
+
+    os << "+---------------------+---------+------------------+-------------------+-------------------+--------------------+-------------------------+--------------+" << endl;
+
     return os;
 }
 
@@ -302,7 +309,7 @@ void Patient::writeToFile() {
     fs.close();
 }
 
-void Patient::readInFormationByPhoneNumber(const string &phoneNumberCheck, int &check) {
+void Patient::readInFormationByPhoneNumber(const string &phoneNumberCheck, int &check, Patient *p) {
     ifstream fs("informationPatient.txt",  ios::in);
     if(!fs.is_open()) {
         cout << "Cannot open information.txt.\n";
@@ -314,13 +321,15 @@ void Patient::readInFormationByPhoneNumber(const string &phoneNumberCheck, int &
         stringstream ss(line);
         string split;
         getline(ss, split, '|'); //split la so dien thoai = ID benh nhan
+        int ok = 0;
         if(split == phoneNumberCheck) {
+            ok = 1;
             check = 1;
-            this->phoneNumber = split;
+            p->phoneNumber = split;
             getline(ss, split, '|'); // split la ten benh nhan
-            this->name = split;
+            p->name = split;
             getline(ss, split, '|'); // split la gender cua benh nhan
-            this->gender = stoi(split);
+            p->gender = stoi(split);
             getline(ss, split, '|'); // split la ngay sinh cua benh nhan
             stringstream ssplit(split);
             string temp;
@@ -339,20 +348,21 @@ void Patient::readInFormationByPhoneNumber(const string &phoneNumberCheck, int &
             for(int i = 0; i<3; i++){
                 getline(ssplitt, temp, '/'); // ssplit la ngay sinh
                 if(i == 0) {
-                    this->dateOfHospital.day = stoi(temp);
+                    p->dateOfHospital.day = stoi(temp);
                 }else if(i == 1) {
-                    this->dateOfHospital.month = stoi(temp);
+                    p->dateOfHospital.month = stoi(temp);
                 }else {
-                    this->dateOfHospital.year = stoi(temp);
+                    p->dateOfHospital.year = stoi(temp);
                 }
             }
             getline(ss, split, '|'); // split la trieu chung cua benh nhan
-            this->currentStatus = split;
+            p->currentStatus = split;
             getline(ss, split, '|'); // split la que quan cua benh nhan
-            this->address = split;
+            p->address = split;
             getline(ss, split, '|'); // split la ID bac si
-            this->IDdoctor = split;
+            p->IDdoctor = split;
         }
+        if(ok) cout << p;
 
     }
     fs.close();
@@ -432,19 +442,22 @@ void Doctor::setWorking(const int &newWorking) {
 }
 
 ostream& operator<<(ostream& os, Doctor *d) {
-    cout << "The doctor's ID: ";
-    os << d->ID << endl;
-    cout << "The doctor's name: ";
-    os << d->name << endl;
-    cout << "The doctor's gender: ";
-    if(d->gender == 0) cout << "FEMALE\n";
-    else cout << "MALE\n";
-    cout << "The doctor's working status: ";
-    if(d->working == 0) cout << "NO\n";
-    else cout << "YES\n";
-    cout << "_________________________________________________________________________________\n";
+    // In tiêu đề bảng
+    os << "| " << setw(8) << left << d->ID
+       << "| " << setw(23) << left << d->name
+       << "| " << setw(8) << left;
+    if (d->gender == 0) os << "FEMALE";
+    else os << "MALE";
+    os << "| " << setw(7) << left;
+    if (d->working == 0) os << "NO";
+    else os << "YES";
+    os << " |" << endl;
+    
+    os << "+---------+------------------------+---------+---------+" << endl;
+
     return os;
 }
+
 
 void Doctor::readFromFile(int index) {
     ifstream fs("informationDoctor.txt", ios::in);
@@ -481,32 +494,47 @@ void Doctor::readDoctorStatus() {
         cout << "Cannot open informationDoctor.txt\n";
         return;
     }
+    
     string line;
+    
+    // In tiêu đề bảng
+    cout << "+---------+-----------------------+---------+---------------------+------------+" << endl;
+    cout << "| ID      | Name                  | Gender  | Phone Number        | Status     |" << endl;
+    cout << "+---------+-----------------------+---------+---------------------+------------+" << endl;
+    
+    // Đọc thông tin từ file và in ra bảng
     while(getline(fs, line)) {
         stringstream ss(line);
         string split;
-        getline(ss, split, '|'); // split la ID
+        
+        // Tách các trường thông tin
+        getline(ss, split, '|'); // ID
         string id = split;
-        getline(ss, split, '|'); // split la ten
+        getline(ss, split, '|'); // Name
         string name = split;
-        getline(ss, split, '|'); // split la gender
+        getline(ss, split, '|'); // Gender
         int gender = stoi(split);
-        getline(ss, split, '|'); // split la sdt
+        getline(ss, split, '|'); // Phone number
         string phoneNumber = split;
-        getline(ss, split, '|'); // split la so nam kinh nghiem
-        getline(ss, split, '|'); // split la status
+        getline(ss, split, '|'); // Experience
+        getline(ss, split, '|'); // Status
         int status = stoi(split);
+        
+        // Chỉ hiển thị bác sĩ có trạng thái là đang làm việc (status == 1)
         if(status == 1) {
-            cout << "The doctor's ID: " << id << endl;
-            cout << "The doctor's name: " << name << endl;
-            cout << "The doctor's gender: ";
-            if(gender == 1) cout << "MALE\n";
-            else cout << "FEMALE\n";
-            cout << "The doctor's phone number: " << phoneNumber << endl;
-            cout << "The doctor's status: YES\n";
-            cout << "______________________________________________________\n";
+            cout << "| " << setw(8) << left << id
+                 << "| " << setw(22) << left << name
+                 << "| " << setw(8) << left;
+            if(gender == 1) cout << "MALE";
+            else cout << "FEMALE";
+            cout << "| " << setw(20) << left << phoneNumber
+                 << "| " << setw(10) << left << "YES" << " |" << endl;
         }
     }
+    
+    // In cuối bảng
+    cout << "+---------+-----------------------+---------+---------------------+------------+" << endl;
+    
     fs.close();
 }
 void Doctor::readFromFileByID(const string &IDcheck, int &check){
@@ -553,27 +581,46 @@ Prescription::Prescription(string ID, string namePrescription, double price, str
 }
 
 void Prescription::readFromFile() {
-    cout << setw(60) << "_____________________________________" << endl;
-    cout << setw(60) << "|     THE MEDICINE'S INFORMATION    |" << endl;
-    cout << setw(60) << "|___________________________________|" << endl << endl;
+    // In tiêu đề bảng
+    cout << "+---------+----------------------------------+---------+-------------------------+" << endl;
+    cout << "| ID      | Medicine's Name                  | Cost    | Dosage Form             |" << endl;
+    cout << "+---------+----------------------------------+---------+-------------------------+" << endl;
+
     ifstream fs("medicineAndPrice.txt", ios::in);
-    if(!fs.is_open()){
+    if(!fs.is_open()) {
         cout << "Cannot open medicineAndPrice.txt";
         return;
     }
+
     string line;
-    while(getline(fs, line)){
+    while(getline(fs, line)) {
         stringstream ss(line);
         string temp;
-        getline(ss, temp, '|'); // temp la ID thuoc
-        cout << "ID: " << temp << endl;
-        getline(ss, temp, '|'); // temp la ten thuoc
-        cout << "Medicine's name: " << temp << endl;
-        getline(ss, temp, '|'); //temp la gia ban hang(bo qua)
-        getline(ss, temp, '|'); // temp la dang bao che
-        cout << "Medicine's dosage form: " << temp << endl;
-        cout << "___________________________________________________________________\n";
+
+        // Tách các thông tin thuốc
+        getline(ss, temp, '|'); // ID thuốc
+        string id = temp;
+
+        getline(ss, temp, '|'); // Tên thuốc
+        string name = temp;
+
+        getline(ss, temp, '|'); // Giá bán (bỏ qua)
+        string cost = temp;
+
+        getline(ss, temp, '|'); // Dạng bào chế
+        string dosageForm = temp;
+
+        // In thông tin thuốc theo định dạng bảng
+        cout << "| " << setw(8) << left << id
+             << "| " << setw(33) << left << name
+             << "| " << setw(8) << left << cost
+             << "| " << setw(24) << left << dosageForm
+             << "|" << endl;
     }
+
+    // In cuối bảng
+    cout << "+---------+----------------------------------+---------+-------------------------+" << endl;
+
     fs.close();
 }
 
@@ -765,7 +812,7 @@ void Bill::calculateTotalCost() {
 }
 
 void Bill::displayBill() {
-    cout << "==============" << setw(30) << "HOA DON" << setw(30) << "==============" << endl;
+    cout << "==============" << setw(25) << "HOA DON" << setw(30) << "==============" << endl;
 
     // Đọc thông tin bệnh nhân từ file informationPatient.txt để lấy tên bệnh nhân và ID bác sĩ
     ifstream patientFile("informationPatient.txt");

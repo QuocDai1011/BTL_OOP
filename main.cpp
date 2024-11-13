@@ -43,10 +43,14 @@ int main() {
             case 1: {
                 system("CLS");
                 cout << "-------------------- LIST OF DOCTORS --------------------\n";
+                cout << "+---------+------------------------+---------+---------+" << endl;
+                cout << "| ID      | NAME                   | GENDER  | WORKING |" << endl;
+                cout << "+---------+------------------------+---------+---------+" << endl;
                 for(int i = 0; i < 7; i++) {
                     doctor[i] = new Doctor;
                     Doctor* doctorPtr = dynamic_cast<Doctor*>(doctor[i]);
                     doctorPtr->readFromFile(i);
+                        // In thông tin bác sĩ
                     cout << doctorPtr;
                 }
                 break;
@@ -59,12 +63,13 @@ int main() {
                 cout << "Enter the patient's phone number: ";
                 getline(cin, phone);
                 int check;
-                pte->readInFormationByPhoneNumber(phone, check);
                 system("CLS");
+                cout << "+---------------------+---------+------------------+-------------------+-------------------+--------------------+-------------------------+--------------+" << endl;
+                cout << "| Name                | Gender  | Phone Number     | Date of Birth     | Admission Date    | Address            | Current Status          | Doctor's ID  |" << endl;
+                cout << "+---------------------+---------+------------------+-------------------+-------------------+--------------------+-------------------------+--------------+" << endl;
+                pte->readInFormationByPhoneNumber(phone, check, pte);
                 if(check == 0) {
                     cout << "NOT FOUND THE PATIENT!\n";
-                }else {
-                    cout << pte;
                 }
                 break;
             }
@@ -83,17 +88,24 @@ int main() {
                 cout << "Enter the patient's phone number: ";
                 getline(cin, phone);
                 int check;
-                pte->readInFormationByPhoneNumber(phone, check);
+                pte->readInFormationByPhoneNumber(phone, check, pte);
                 system("CLS");
                 if(check == 0) {
                     cout << "NOT FOUND THE PATIENT TO UPDATE INFORMATION!\n";
                 }else {
+                    cout << "+---------------------+---------+------------------+-------------------+-------------------+--------------------+-------------------------+--------------+" << endl;
+                    cout << "| Name                | Gender  | Phone Number     | Date of Birth     | Admission Date    | Address            | Current Status          | Doctor's ID  |" << endl;
+                    cout << "+---------------------+---------+------------------+-------------------+-------------------+--------------------+-------------------------+--------------+" << endl;
                     cout << pte;
                 }
-                cout << "------------------------------ UPDATE INFORMATION ------------------------------\n";
+                cout << "\n------------------------------ UPDATE INFORMATION ------------------------------\n";
                 pte->updateInformation();
                 system("CLS");
-                cout << "----------------------------- UPDATE SUCCESSFULLY ------------------------------\n";
+                cout << "----------------------------- UPDATE SUCCESSFULLY ------------------------------\n\n";
+                cout << "+---------------------+---------+------------------+-------------------+-------------------+--------------------+-------------------------+--------------+" << endl;
+                cout << "| Name                | Gender  | Phone Number     | Date of Birth     | Admission Date    | Address            | Current Status          | Doctor's ID  |" << endl;
+                cout << "+---------------------+---------+------------------+-------------------+-------------------+--------------------+-------------------------+--------------+" << endl;
+  
                 cout << pte;
                 pte->writeToFile();
                 break;
@@ -111,9 +123,8 @@ int main() {
                 bill.displayBill();           // Hiển thị hóa đơn
                 break;
             }
-
             case 0: {
-                break;
+                break; 
             }
             default:
                 break;

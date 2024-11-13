@@ -8,5 +8,5 @@ void doc(int n);
 void docso(int n);
 string nameFormat(string name);
 string removeSpace(string s);
-
+void getCurrentDate(int &day, int &month, int &year);
 
