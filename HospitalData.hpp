@@ -96,6 +96,8 @@ class Patient : public Human {
 		void writeToFile();
 		void readInFormationByPhoneNumber(const string &phoneNumberCheck, int &check, Patient *p);
 		void updateInformation();
+		bool checkIDdoctor(string ID);
+		bool checkIDmedicine(string ID); 
 }; 
 
 class Doctor : public Human {
@@ -122,9 +124,12 @@ class Doctor : public Human {
 		//nap chong toan tu cout
 		friend ostream& operator<<(ostream& os, Doctor *d);
 		//
-		void readFromFile(int index);
+		void readFromFile();
 		void readDoctorStatus();
 		void readFromFileByID(const string &IDcheck, int &check);
+		void addDoctor();
+		void deleteDoctor();
+		void sortExperience();
 };
 
 class Prescription {

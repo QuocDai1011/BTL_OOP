@@ -7,6 +7,10 @@
 #include <cstring>
 #include <conio.h>
 #include <vector>
+#include <set>
+#include <algorithm>
+#include <thread> 
+#include <chrono> 
 using namespace std;
 
 Human::Human() {
@@ -54,78 +58,83 @@ void Staff::logIn(int &login) {
     cout << setw(50) << "__________" << endl;
     cout << setw(50) << "| LOGIN  |" << endl;
     cout << setw(50) << "|________|" << endl;
-	ifstream fs("informationStaff.txt", ios::in);
-	if(!fs.is_open()){
-		cout << "Cannot open file informationStaff.txt";
-		return;
-	}
-	int attemptCount = 3; // Giới hạn số lần đăng nhập
-    while (attemptCount--) {
-        cout << "Enter ID: ";
-        cin >> this->ID;
-        char ch;
-        cout << "Enter Password: ";
-        while (true) {
-            ch = _getch(); // Lấy ký tự mà không hiển thị
-            if (ch == 13) { // Kiểm tra nếu người dùng nhấn Enter
-                break;
-            } else if (ch == 8) { // Kiểm tra nếu người dùng nhấn Backspace
-                if (!this->pass.empty()) {
-                    this->pass.pop_back(); // Xóa ký tự cuối cùng trong mật khẩu
-                    cout << "\b \b"; // Xóa dấu * trên màn hình
-                }
-            } else {
-                this->pass += ch; // Thêm ký tự vào mật khẩu
-                cout << "*"; // Hiển thị dấu * cho mỗi ký tự nhập
-            }
-        }
-        cout << endl;
 
-        fs.clear(); // Xóa trạng thái EOF (nếu có)
-        fs.seekg(0); // Đưa con trỏ tệp về đầu
-
-        bool loginSuccess = false;
-        string str;
-        while (getline(fs, str)) {
-            stringstream ss(str);
-            string fileID, filePass;
-            ss >> fileID >> filePass;
-
-            if (fileID == this->ID && filePass == this->pass) {
-				system("CLS");
-                cout << "LOGIN SUCCESS! Hello ";
-                string name;
-				string fullName;
-                while (ss >> name) {
-					fullName += name + " ";
-                    cout << name << ' ';
-                }
-				this->name = fullName;
-                cout << "\nLoading: ";
-                for(int i=1; i<=50; i++) {
-                    int temp = 0;
-                    for(int i=0; i<10000; i++) {
-                        for(int i=0; i<10000; i++){
-                            temp += temp;
-                        }
-                    }
-                    cout << "=";
-                }
-                cout << " SUCCESS =)))\n";
-                cout << "HAVE A NICE DAY!\n";
-				login = 1;
-                fs.close();
-                return;
-            }
-        }
-
-        cout << "LOGIN FAILED!" << endl;
+    ifstream fs("informationStaff.txt", ios::in);
+    if (!fs.is_open()) {
+        cout << "Cannot open file informationStaff.txt";
+        return;
     }
 
-    cout << "Too many failed attempts. Please try again later.\n";
+    // Đọc thông tin từ file vào danh sách
+    vector<pair<string, string>> credentials;
+    string line;
+    while (getline(fs, line)) {
+        stringstream ss(line);
+        string fileID, filePass;
+        ss >> fileID >> filePass;
+        credentials.push_back({fileID, filePass});
+    }
     fs.close();
-	
+
+        int attemptCount = 3; // Giới hạn số lần đăng nhập
+        while (attemptCount--) {
+            cout << "Enter ID: ";
+            cin >> this->ID;
+
+            char ch;
+            string inputPass;
+            cout << "Enter Password: ";
+            while (true) {
+                ch = _getch(); // Lấy ký tự mà không hiển thị
+                if (ch == 13) { // Enter kết thúc nhập
+                    break;
+                } else if (ch == 8) { // Backspace xóa ký tự
+                    if (!inputPass.empty()) {
+                        inputPass.pop_back();
+                        cout << "\b \b";
+                    }
+                } else {
+                    inputPass += ch;
+                    cout << "*";
+                }
+            }
+            cout << endl;
+
+            // Kiểm tra thông tin đăng nhập
+            bool loginSuccess = false;
+            for (const auto& cred : credentials) {
+                if (cred.first == this->ID && cred.second == inputPass) {
+                    loginSuccess = true;
+                    break;
+                }
+            }
+
+            if (loginSuccess) {
+                system("CLS");
+                cout << "LOGIN SUCCESS! Welcome, " << this->ID << ".\n";
+                cout << "Loading: ";
+                for (int i = 0; i < 50; ++i) {
+                    cout << "=";
+                    this_thread::sleep_for(chrono::milliseconds(50)); // Hiệu ứng thời gian
+                }
+                for (int i = 0; i < 20; ++i) {
+                    this_thread::sleep_for(chrono::milliseconds(50)); // Hiệu ứng thời gian
+                }
+                cout << " SUCCESS =)))\n";
+                cout << "HAVE A NICE DAY!\n\n\n";
+                login = 1;
+                return;
+            } else {
+                cout << "LOGIN FAILED! ";
+                if (attemptCount > 0) {
+                    cout << "You have " << attemptCount << " attempt(s) remaining.\n";
+                }
+            }
+        }
+
+    cout << "Too many failed attempts. Please try again later.\n";
 }
+
 
 Patient::Patient() : Human() {
 	dateOfBirth = {0, 0, 0};
@@ -215,19 +224,24 @@ istream& operator>>(istream& is, Patient *p) {
     
     is.ignore(); // Xóa bộ đệm sau khi nhập gender
 
-    cout << "Enter the patient's telephone number: ";
+    cout << "Enter the patient's telephone number (0xxxxxxxxx): ";
     is >> ws; // Xóa khoảng trắng thừa
-    getline(is, p->phoneNumber);
+    do {
+        getline(is, p->phoneNumber);
+        if(!checkSDT(p->phoneNumber)) {
+            cout << "The telephone number is not valid. Try again: ";
+        }
+    }while(!checkSDT(p->phoneNumber));
 
     cout << "Enter the patient's date of birth (dd mm yyyy): ";
     Date birth;
     do {
         is >> birth.day >> birth.month >> birth.year;
         p->setDateOfBirth(birth);
-        if(!validationDate(birth)){
+        if(!validationDate(birth) || !checkDate(birth)){
             cout << "Enter date of birth failed. Try again: ";
         }
-    }while(!validationDate(birth));
+    }while(!validationDate(birth) || !checkDate(birth));
     Date admission;
     getCurrentDate(admission.day, admission.month, admission.year);
     p->setDateOfHospital(admission);
@@ -243,12 +257,17 @@ istream& operator>>(istream& is, Patient *p) {
     string status;
     getline(is, status);
     p->setCurrentStatus(status);
-    cout << "-------------------- LIST OF DOCTORS ON DUTY --------------------\n";
+    cout << "\n-------------------- LIST OF DOCTORS ON DUTY --------------------\n";
     Doctor dt;
     dt.readDoctorStatus();
     cout << "Enter the ID of the doctor: ";
     string ID;
-    cin >> ID;
+    do {
+        cin >> ID;
+        if(!p->checkIDdoctor(ID)) {
+            cout << "Cannot found Doctor's ID. Try again: ";
+        }
+    }while(!p->checkIDdoctor(ID));
     p->setIDdoctor(ID);
     system("CLS");
     cout << "-------------------------- DOCTOR CHOOSES MEDICINE FOR PATIENT --------------------------\n";
@@ -259,18 +278,26 @@ istream& operator>>(istream& is, Patient *p) {
     pre.readFromFile();
     cout << "Enter medication according to patient ID: ";
     is >> ws;
-    getline(is, p->IDmedicine);
-    p->IDmedicine = removeSpace(p->IDmedicine);
+    do {
+        getline(is, p->IDmedicine);
+        p->IDmedicine = removeSpace(p->IDmedicine);
+        if(!p->checkIDmedicine(p->IDmedicine)) {
+            cout << "The entered drug code was not found in the data. Try again: ";
+        }
+    }while(!p->checkIDmedicine(p->IDmedicine));
     cout << "Enter the quantity of medicine corresponding to the type of medicine: ";
-    getline(is, p->quantity);
-    p->quantity = removeSpace(p->quantity);
+    do {
+        getline(is, p->quantity);
+        p->quantity = removeSpace(p->quantity);
+        if(!checkQuantity(p->quantity)) {
+            cout << "The entered data is invalid. Try again: ";
+        }
+    }while(!checkQuantity(p->quantity));
     cout << "___________________________________________________________________________________\n";
     return is;
 }
 
 ostream& operator<<(ostream& os, Patient *p) {
-    // In tiêu đề bảng
-  
     // In thông tin bệnh nhân theo các cột
     os << "| " << setw(20) << left << p->name
        << "| " << setw(8) << left;
@@ -282,10 +309,10 @@ ostream& operator<<(ostream& os, Patient *p) {
        << "| " << setw(18) << left << dateBirth
        << "| " << setw(18) << left << dateAmi
        << "| " << setw(19) << left << p->address
-       << "| " << setw(24) << left << p->currentStatus
+       << "| " << setw(34) << left << p->currentStatus
        << "| " << setw(12) << left << p->IDdoctor << " |" << endl;
 
-    os << "+---------------------+---------+------------------+-------------------+-------------------+--------------------+-------------------------+--------------+" << endl;
+    os << "+---------------------+---------+------------------+-------------------+-------------------+--------------------+-----------------------------------+--------------+" << endl;
 
     return os;
 }
@@ -369,21 +396,24 @@ void Patient::readInFormationByPhoneNumber(const string &phoneNumberCheck, int &
 } 
 
 void Patient::updateInformation() {
-    cout << "Update the patient's admission date (dd mm yyyy): ";
     Date doa;
-    cin >> doa.day >> doa.month >> doa.year;
+    getCurrentDate(doa.day, doa.month, doa.year);
     this->dateOfHospital = doa;
     cout << "Update the patient's current status: ";
     string temp;
-    cin.ignore();
     getline(cin, temp);
     this->currentStatus = temp;
-    cout << "-------------------- LIST OF DOCTORS ON DUTY --------------------\n";
+    cout << "\n-------------------- LIST OF DOCTORS ON DUTY --------------------\n";
     Doctor dt;
     dt.readDoctorStatus();
     cout << "Enter the ID of the doctor: ";
     string ID;
-    cin >> ID;
+    do {
+        cin >> ID;
+        if(!this->checkIDdoctor(ID)) {
+            cout << "Cannot found Doctor's ID. Try again: ";
+        }
+    }while(!this->checkIDdoctor(ID));
     this->IDdoctor = ID;
     system("CLS");
     cout << "-------------------------- DOCTOR CHOOSES MEDICINE FOR PATIENT --------------------------\n";
@@ -397,10 +427,59 @@ void Patient::updateInformation() {
     getline(cin, this->IDmedicine);
     this->IDmedicine = removeSpace(this->IDmedicine);
     cout << "Enter the quantity of medicine corresponding to the type of medicine: ";
-    getline(cin, this->quantity);
-    this->quantity = removeSpace(this->quantity);
+    do {
+        getline(cin, this->quantity);
+        this->quantity = removeSpace(this->quantity);
+        if(!checkQuantity(this->quantity)) {
+            cout << "The entered data is invalid. Try again: ";
+        }
+    }while(!checkQuantity(this->quantity));
     cout << "___________________________________________________________________________________\n";
   
+}
+
+bool Patient::checkIDdoctor(string IDcheck) {
+    ifstream fs("informationDoctor.txt", ios::in);
+    if(!fs.is_open()) {
+        cout << "Cannot open informationDoctor.txt!";
+        return false;
+    }
+    string line;
+    while(getline(fs, line)) {
+        stringstream ss(line);
+        string word;
+        getline(ss, word, '|'); // word la ID cua bac si
+        if(word == IDcheck) {
+            return true;
+        }
+    }
+    fs.close();
+    return false;
+}
+
+bool Patient::checkIDmedicine(string IDcheck) {
+    ifstream fs("medicineAndPrice.txt", ios::in);
+    if(!fs.is_open()) {
+        cout << "Cannot open medicineAndPrice.txt!\n";
+        return false;
+    }
+    string line;
+    set<string> se;
+    while(getline(fs, line)) {
+        stringstream ss(line);
+        string word;
+        getline(ss, word, '|'); // word la ID cua thuoc
+        se.insert(word);
+    }
+    stringstream split(IDcheck);
+    string cut;
+    while(getline(split, cut, ',')) {
+        if(se.find(cut) == se.end()) {
+            return false;
+        }
+    }
+    fs.close();
+    return true;
 }
 
 
@@ -459,32 +538,31 @@ ostream& operator<<(ostream& os, Doctor *d) {
 }
 
 
-void Doctor::readFromFile(int index) {
+void Doctor::readFromFile() {
     ifstream fs("informationDoctor.txt", ios::in);
     if(!fs.is_open()) {
         cout << "Cannot open informationDoctor.txt\n";
         return;
     }
-    for(int i=0; i<index; i++) {
-        string line1;
-        getline(fs, line1);
-    }
     string line;
-    getline(fs, line);
-    stringstream ss(line);
-    string word;
-    getline(ss, word, '|'); //word la ID
-    this->ID = word;
-    getline(ss, word, '|'); //word la ten
-    this->name = word;
-    getline(ss, word, '|'); // word la gender
-    this->gender = stoi(word);
-    getline(ss, word, '|'); // word la so dien thoai
-    this->phoneNumber = word;
-    getline(ss, word, '|'); //word la nam kinh nghiem
-    this->experience = stoi(word);
-    getline(ss, word, '|'); // word la trang thai lam viec
-    this->working = stoi(word);
+    while(getline(fs, line)) {
+        stringstream ss(line);
+        string word;
+        getline(ss, word, '|'); //word la ID
+        this->ID = word;
+        getline(ss, word, '|'); //word la ten
+        this->name = word;
+        getline(ss, word, '|'); // word la gender
+        this->gender = stoi(word);
+        getline(ss, word, '|'); // word la so dien thoai
+        this->phoneNumber = word;
+        getline(ss, word, '|'); //word la nam kinh nghiem
+        this->experience = stoi(word);
+        getline(ss, word, '|'); // word la trang thai lam viec
+        this->working = stoi(word);
+        cout << this;
+    }
+    
     fs.close();
 }
 
@@ -539,7 +617,7 @@ void Doctor::readDoctorStatus() {
 }
 void Doctor::readFromFileByID(const string &IDcheck, int &check){
     check = 0;
-     ifstream fs("informationDoctor.txt", ios::in);
+    ifstream fs("informationDoctor.txt", ios::in);
     if(!fs.is_open()) {
         cout << "Cannot open informationDoctor.txt\n";
         return;
@@ -550,6 +628,7 @@ void Doctor::readFromFileByID(const string &IDcheck, int &check){
         string split;
         getline(ss, split, '|'); // ID
         if(split == IDcheck) {
+            check = 1;
             this->ID = split;
             getline(ss, split, '|'); //name
             this->name = split;
@@ -565,6 +644,163 @@ void Doctor::readFromFileByID(const string &IDcheck, int &check){
     }
     fs.close();
 }
+
+void Doctor::addDoctor() {
+    cout << setw(60) << "______________________________________" << endl;
+    cout << setw(60) << "|   ENTER THE DOCTOR'S INFORMATION   |" << endl;
+    cout << setw(60) << "|____________________________________|" << endl;
+    cout << endl;
+    cin.ignore();
+    cout << "Enter the doctor's ID (4 character): ";
+    do {
+        getline(cin, this->ID);
+        if(this->ID.size() != 4) {
+            cout << "Enter failed. Try again: ";
+        }
+    }while(this->ID.size() != 4);
+    cout << "Enter the doctor's name: ";
+    getline(cin, this->name);
+    this->name = nameFormat(this->name);
+    cout << "Enter the doctor's gender (0: FEMALE, 1: MALE): ";
+    do {
+        cin >> this->gender;
+        if(this->gender != 0 && this->gender != 1) {
+            cout << "Enter failed. Try again: ";
+        }
+    }while(this->gender != 0 && this->gender != 1);
+    cout << "Enter the doctor's phone number: ";
+    do {
+        cin >> this->phoneNumber;
+        if(!checkSDT(phoneNumber)) {
+            cout << "The phone number is not isvalid. Try again: ";
+        }
+    }while(!checkSDT(this->phoneNumber));
+    cout << "Enter the doctor's years of experience: ";
+    do {
+        cin >> this->experience;
+        if(this->experience < 0) {
+            cout << "Enter failed. Try again: ";
+        }
+    }while(this->experience < 0);
+    this->working = 0;
+    //ghi vao file
+    ofstream fs("informationDoctor.txt", ios::app);
+    if(!fs.is_open()) {
+        cout << "Cannot open informationDoctor.txt!";
+        return;
+    }
+    fs << this->ID << '|' << this->name << '|' << this->gender
+        << '|' << this->phoneNumber << '|' << this->experience << '|' << this->working << "|\n" ;
+    fs.close();
+}
+
+void Doctor::deleteDoctor() {
+    cout << "\n\n";
+    cin.ignore(); // Đảm bảo làm sạch bộ đệm trước khi nhập
+    cout << "Enter the doctor's ID you want to delete: ";
+    int found = 0;
+
+    do {
+        getline(cin, this->ID);
+        this->readFromFileByID(this->ID, found); // Kiểm tra ID tồn tại
+        if (!found) {
+            cout << "Cannot find the doctor's ID in data. Try again: ";
+        }
+    } while (!found);
+
+    cout << "\nAre you sure you want to delete the doctor with ID " << this->ID
+         << " (Y: YES | N: NO): ";
+    char lc;
+    cin >> lc;
+    if (lc != 'Y') {
+        return; // Hủy thao tác nếu người dùng không xác nhận
+    }
+
+    ifstream fs("informationDoctor.txt");
+    if (!fs.is_open()) {
+        cout << "Cannot open informationDoctor.txt!\n";
+        return;
+    }
+
+    vector<string> records; // Lưu các dòng vào một vector
+    string line;
+
+    while (getline(fs, line)) {
+        stringstream ss(line);
+        string word;
+        getline(ss, word, '|'); // Tách lấy ID từ dòng
+        if (word != this->ID) { // Chỉ lưu lại dòng không trùng ID
+            records.push_back(line);
+        }
+    }
+    fs.close(); // Đóng file đọc
+
+    ofstream of("informationDoctor.txt");
+    if (!of.is_open()) {
+        cout << "Cannot open informationDoctor.txt!\n";
+        return;
+    }
+
+    for (const auto& record : records) {
+        of << record << endl; // Ghi lại các dòng còn lại vào file
+    }
+    of.close(); // Đóng file ghi
+
+    cout << "Doctor with ID " << this->ID << " has been deleted successfully.\n";
+}
+
+void Doctor::sortExperience() {
+    ifstream fs("informationDoctor.txt", ios::in);
+    if (!fs.is_open()) {
+        cout << "Cannot open informationDoctor.txt!\n";
+        return;
+    }
+
+    vector<Doctor*> doctors; // Danh sách con trỏ Doctor
+    string line;
+
+    // Đọc dữ liệu từ file và lưu vào vector
+    while (getline(fs, line)) {
+        stringstream ss(line);
+        Doctor* doc = new Doctor(); // Cấp phát bộ nhớ động
+        string token;
+
+        getline(ss, doc->ID, '|');
+        getline(ss, doc->name, '|');
+        getline(ss, token, '|');
+        doc->gender = stoi(token);
+        getline(ss, doc->phoneNumber, '|');
+        getline(ss, token, '|');
+        doc->experience = stoi(token);
+        getline(ss, token, '|');
+        doc->working = stoi(token);
+
+        doctors.push_back(doc);
+    }
+    fs.close();
+
+    // Sắp xếp theo số năm kinh nghiệm giảm dần
+    sort(doctors.begin(), doctors.end(), [](const Doctor* a, const Doctor* b) {
+        return a->experience > b->experience;
+    });
+
+    // Hiển thị danh sách bác sĩ sau khi sắp xếp
+    cout << "-------------------- LIST OF DOCTORS --------------------\n";
+    cout << "+---------+------------------------+---------+---------+" << endl;
+    cout << "| ID      | NAME                   | GENDER  | WORKING |" << endl;
+    cout << "+---------+------------------------+---------+---------+" << endl;
+    for(auto x : doctors) {
+        cout << x;
+    }
+    for (auto* doc : doctors) {
+        delete doc;
+    }
+    doctors.clear();
+}
+
+
+
+
 
 Prescription::Prescription() {
 	ID = "";

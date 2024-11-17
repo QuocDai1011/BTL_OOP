@@ -1,5 +1,5 @@
-0965399554|Mai Quoc Dai|1|10/11/2005|31/10/2024|dau dau, chong mat, sot cao|Dong Nai|8FH2|23V,59Z|14,14|
-0928289577|Truong Doan Vien|1|19/11/2005|30/10/2023|dau mat ca chan, bam tim|Dong Nai|Q7WK|17L,53U|15,15|
-0928289577|Truong Doan Vien|1|19/11/2005|30/10/2023|sot cao, chong mat|Dong Nai|Q7WK|17L,53U|15,15|
-0985346215|Mai Cong Danh|1|13/11/2024|0/0/0|dau dau|Dong Nai|CN9C|17L|9|
-0985346215|Mai Cong Danh|1|10/11/2005|13/11/2024|dau dau|Dong Nai|sdff|13|13|
+0123456789|Nguyen Van A|1|10/11/1990|30/10/2022|dau dau, chong mat, sot cao|Dong Nai|8FH2|11B,55A|21,21|
+0987654321|Tran Thi B|0|1/12/2001|21/12/2002|dau bung, buon non|Dak Lak|I66N|82J,99T,17L|14,21,21|
+0912345678|Hoang Van C|1|28/9/2003|6/9/2019|dau mat ca chan|Vung Tau|M45F|58G|21|
+0911111111|Cao Xuan Diep|1|19/11/2005|15/11/2024|trat khop co chan|Thai Binh|B138|37L,17L,53U|14,14,14|
+0988888888|Tran Nhu Q|0|21/12/2002|1/1/2024|so mui, dau hong|Ha Noi|Q7WK|35D,83C,59Z|21,21,21|

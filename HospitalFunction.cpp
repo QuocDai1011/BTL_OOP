@@ -43,22 +43,28 @@ bool validationDate(Date date) {
 }
 
 void printFunctions() {
-	cout << "++++++++++-----------------FUNCTIONS-----------------------++++++++++\n";
-    cout << "_________________________________________________\n";
-    cout << "|  INDEX |              FUNCTIONS               |\n";
-    cout << "|________|______________________________________|\n";
-    cout << "|    1   | LOOK UP DOCTOR INFORMATION           |\n";
-    cout << "|________|______________________________________|\n"; 
-    cout << "|    2   | FIND PATIENTS BY PHONE NUMBER        |\n";
-    cout << "|________|______________________________________|\n";
-    cout << "|    3   | ENTER PATIENT INFORMATION            |\n";
-    cout << "|________|______________________________________|\n";
-    cout << "|    4   | UPDATE PATIENT INFORMATION           |\n";
-    cout << "|________|______________________________________|\n";
-    cout << "|    5   | PRINT INVOICE                        |\n";
-    cout << "|________|______________________________________|\n";
-    cout << "|    0   | LOG OUT                              |\n";
-    cout << "|________|______________________________________|\n\n";
+	cout << "\n\n++++++++++-----------------FUNCTIONS-----------------------++++++++++\n";
+    cout << "___________________________________________________________\n";
+    cout << "|  INDEX |              FUNCTIONS                         |\n";
+    cout << "|________|________________________________________________|\n";
+    cout << "|    1   | LOOK UP DOCTOR INFORMATION                     |\n";
+    cout << "|________|________________________________________________|\n"; 
+    cout << "|    2   | FIND PATIENTS BY PHONE NUMBER                  |\n";
+    cout << "|________|________________________________________________|\n";
+    cout << "|    3   | ENTER PATIENT INFORMATION                      |\n";
+    cout << "|________|________________________________________________|\n";
+    cout << "|    4   | UPDATE PATIENT INFORMATION                     |\n";
+    cout << "|________|________________________________________________|\n";
+    cout << "|    5   | PRINT INVOICE                                  |\n";
+    cout << "|________|________________________________________________|\n";
+	cout << "|    6   | ADD NEW DOCTOR INFORMATION                     |\n";
+    cout << "|________|________________________________________________|\n";
+	cout << "|    7   | DELETE DOCTOR INFORMATION                      |\n";
+    cout << "|________|________________________________________________|\n";
+	cout << "|    8   | LIST SORTED THE DOCTOR'S YEAR OF EXPERIENCE    |\n";
+    cout << "|________|________________________________________________|\n";
+    cout << "|    0   | LOG OUT                                        |\n";
+    cout << "|________|________________________________________________|\n\n";
 }
 
 void doc(int n) {
@@ -234,4 +240,42 @@ void getCurrentDate(int &day, int &month, int &year) {
     day = now->tm_mday;         // Ngày hiện tại
     month = now->tm_mon + 1;    // Tháng hiện tại (tm_mon bắt đầu từ 0, nên cộng thêm 1)
     year = now->tm_year + 1900; // Năm hiện tại (tm_year bắt đầu từ 1900, nên cộng thêm 1900)
+}
+
+bool checkSDT(string sdt) {
+	if (sdt.size() != 10) return 0;
+	if (sdt[0] != '0') return 0;
+	for (int i = 1; i < sdt.size(); i++) {
+		if (!isdigit(sdt[i])) return 0;
+	}
+	return 1;
+}
+
+bool checkDate(Date d) {
+	time_t t = time(0);//set time 00:00:00
+	struct tm* currTime = localtime(&t);
+	if (d.year < currTime->tm_year + 1900) return 1;
+	else if(d.year==currTime->tm_year + 1900){
+		if (d.month < currTime->tm_mon + 1) return 1;
+		else if (d.month == currTime->tm_mon + 1) {
+			if (d.day < currTime->tm_mday) return 1;
+			else return 0;
+		}
+		else return 0;
+	}
+	else return 0;
+}
+
+bool checkQuantity(string quantity) {
+	stringstream ss(quantity);
+	string temp;
+	while(getline(ss, temp, ',')) {
+		for(char x : temp) {
+			if(!isdigit(x)) {
+				return false;
+			}
+		}
+		if(stoi(temp) <= 0) return false;
+	}
+	return true;
 }
