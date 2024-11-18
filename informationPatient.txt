@@ -1,5 +1,5 @@
-0123456789|Nguyen Van A|1|10/11/1990|30/10/2022|dau dau, chong mat, sot cao|Dong Nai|8FH2|11B,55A|21,21|
-0987654321|Tran Thi B|0|1/12/2001|21/12/2002|dau bung, buon non|Dak Lak|I66N|82J,99T,17L|14,21,21|
-0912345678|Hoang Van C|1|28/9/2003|6/9/2019|dau mat ca chan|Vung Tau|M45F|58G|21|
-0911111111|Cao Xuan Diep|1|19/11/2005|15/11/2024|trat khop co chan|Thai Binh|B138|37L,17L,53U|14,14,14|
-0988888888|Tran Nhu Q|0|21/12/2002|1/1/2024|so mui, dau hong|Ha Noi|Q7WK|35D,83C,59Z|21,21,21|
+0999999999|Tran Van A|dau dau|17L,53U|6,4|3450|13/1/2024|40000
+0111111111|Nguyen Thi B|sot, so mui, met moi|17L,53U,99T|15,10,5|75000
+0222222222|Dinh Thi C|so mui, dau hong|17L,58G|6,2|20000
+0333333333|Hoang Van D|dau mat ca chan|17L,82J,11B|15,10,15|50000
+0444444444|Cao Van E|dau bung|11B,53U,35D|6,4,2|45000

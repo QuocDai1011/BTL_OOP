@@ -5,9 +5,15 @@
 #include <set>
 #include <string>
 #include <iomanip>
+#include <ctime>
 #include "./HospitalData.hpp"
 #include "./HospitalFunction.hpp"
 using namespace std;
+
+const string RESET = "\033[0m";  // Reset lại màu mặc định
+const string RED = "\033[31m";  // Màu đỏ
+const string GREEN = "\033[32m";  // Màu xanh lá
+const string BLUE = "\033[34m";
 
 bool isLeapYear(int year) {
     return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
@@ -43,11 +49,11 @@ bool validationDate(Date date) {
 }
 
 void printFunctions() {
-	cout << "\n\n++++++++++-----------------FUNCTIONS-----------------------++++++++++\n";
-    cout << "___________________________________________________________\n";
+	cout << GREEN << "\n\n++++++++++-----------------FUNCTIONS-----------------------++++++++++\n" << RESET;
+    cout << RED << "___________________________________________________________\n";
     cout << "|  INDEX |              FUNCTIONS                         |\n";
-    cout << "|________|________________________________________________|\n";
-    cout << "|    1   | LOOK UP DOCTOR INFORMATION                     |\n";
+    cout << "|________|________________________________________________|\n" << RESET;
+    cout << BLUE << "|    1   | LOOK UP DOCTOR INFORMATION                     |\n";
     cout << "|________|________________________________________________|\n"; 
     cout << "|    2   | FIND PATIENTS BY PHONE NUMBER                  |\n";
     cout << "|________|________________________________________________|\n";
@@ -64,7 +70,7 @@ void printFunctions() {
 	cout << "|    8   | LIST SORTED THE DOCTOR'S YEAR OF EXPERIENCE    |\n";
     cout << "|________|________________________________________________|\n";
     cout << "|    0   | LOG OUT                                        |\n";
-    cout << "|________|________________________________________________|\n\n";
+    cout << "|________|________________________________________________|\n\n" << RESET;
 }
 
 void doc(int n) {

@@ -60,18 +60,16 @@ class Staff : public Human {
 
 class Patient : public Human {
 	private:
-		Date dateOfBirth;
-		string address;
-		Date dateOfHospital; // ngay nhap vien
+		Date dateBuy; // ngay mua thuoc
 		string currentStatus; // tinh trang hien tai
-		string IDdoctor; // ID bac si kham benh
 		string IDmedicine; // ID thuoc
 		string quantity; //so luong thuoc.
+		string accumulatedPoints; // diem da tich duoc
+		string amountReceived; // so tien da nhan
 	public:
 		Patient();
-		Patient(string name, int gender, string phoneNumber, Date dateOfBirth, 
-		string address, Date dateOfHospital, string currentStatus, 
-		string IDdoctor, string IDmedicine, string quantity);
+		Patient(string name, int gender, string phoneNumber, Date dateBuy, string currentStatus, 
+		string IDmedicine, string quantity, string accumulatedPoints, string amountReceived);
 		Date getDateOfBirth();
 		string getAddress();
 		Date getDateOfHospital();
@@ -83,9 +81,6 @@ class Patient : public Human {
 		void setName(const string &newName);
 		void setGender(const int &newGender) { Human::setGender(newGender); }
 		void setPhoneNumber(const string &newPhoneNumber) { Human::setPhoneNumber(newPhoneNumber); }
-		void setDateOfBirth(const Date &newDate);
-		void setDateOfHospital(const Date &newDate);
-		void setAddress(const string &newAddress);
 		void setCurrentStatus(const string &newStatus);
 		void setIDdoctor(const string &newIDdoctor);
 		//
@@ -93,54 +88,22 @@ class Patient : public Human {
 		// void outInformation();
 		friend istream& operator>>(istream& is, Patient *p);
 		friend ostream& operator<<(ostream& os, Patient *p);
-		void writeToFile();
-		void readInFormationByPhoneNumber(const string &phoneNumberCheck, int &check, Patient *p);
-		void updateInformation();
 		bool checkIDdoctor(string ID);
 		bool checkIDmedicine(string ID); 
 }; 
 
-class Doctor : public Human {
-	private: 
-		string ID;
-		int experience; //tinh bang so nam lam viec
-		int working; //co dang lam viec hay khong 0 la KHONG CO BENH NHAN KHAM, 1 la DANG KHAM  
-	public:
-		Doctor();
-		Doctor(string name, int gender, string phoneNumber, string ID, int experience, int working);
-		string getName() const override { return name; }
-        int getGender() const override { return gender; }
-        string getPhoneNumber() const override { return phoneNumber; }
-		string getID();
-		int getExperience();
-		int getWorking();
-		//set
-		void setName(const string &newName) { Human::setName(newName); }
-		void setGender(const int &newGender) { Human::setGender(newGender); }
-		void setPhoneNumber(const string &newPhoneNumber) { Human::setPhoneNumber(newPhoneNumber); }
-		void setID(const string &newID);
-		void setExperience(const int &newExperience);
-		void setWorking(const int &newWorking);
-		//nap chong toan tu cout
-		friend ostream& operator<<(ostream& os, Doctor *d);
-		//
-		void readFromFile();
-		void readDoctorStatus();
-		void readFromFileByID(const string &IDcheck, int &check);
-		void addDoctor();
-		void deleteDoctor();
-		void sortExperience();
-};
-
 class Prescription {
 	private:
 		string ID;
-		string namePrescription;
-		double price;
+		string namePrescription; // ten thuoc
+		double price; // gia tien
 		string dosageForm; //dang bao che
+		int currentQuantity; // so luong hien tại trong kho
+		string dosageOfDrug; // cach dùng của thuốc
 	public:
 		Prescription();
-		Prescription(string ID, string namePrescription, double price, string dosageForm);
+		Prescription(string ID, string namePrescription, double price, string dosageForm,
+		int currentQuantity, string dosageOfDrug);
 		void readFromFile();
 		string getIDFromFile(string IDCheck);
 		string getNamePresciptionFromFile(string ID);

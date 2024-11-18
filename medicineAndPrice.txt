@@ -1,12 +1,11 @@
-23V|Paracetamol (Acetaminophen)|17500|vien|
-11B|Ibuprofen|880|vien|
-59Z|Amoxicillin|2500|vien|
-55A|Cefuroxime|120000|lo(50ml)|
-82J|Loratadine|840|vien|
-35D|Omeprazole 40mg|6000|vien|
-99T|Metformin 500mg(100 vien)|1500|vien|
-58G|Loperamide 2mg|640|vien|
-83C|Salbutamol (Ventolin 100mcg)|150000|ong(200 lieu)|
-37L|Diazepam (10mg/2ml)|15000|ong tiem|
-17L|Panadol|1000|vien|
-53U|Hapacol|4000|goi|
+23V|Paracetamol (Acetaminophen)|17500|vien|100|sang 1 vien, toi 1 vien|
+11B|Ibuprofen|880|vien|300|uong truoc khi an 30 phut|
+59Z|Amoxicillin|2500|vien|245|sang 1v, trua 1v, toi 1v| 
+55A|Cefuroxime|120000|lo(50ml)|30|sang va toi 5ml truoc khi an|
+82J|Loratadine|840|vien|177|sang 1 vien, toi 1 vien|
+35D|Omeprazole 40mg|6000|vien|90|sang 1 vien|
+99T|Metformin 500mg(100 vien)|1500|vien|137|toi 1 vien|
+58G|Loperamide 2mg|640|vien|777|toi 1 vien truoc ngu 1 tieng|
+83C|Salbutamol (Ventolin 100mcg)|150000|ong(200 lieu)|150|sang 1 ong, toi 1 ong|
+17L|Panadol|1000|vien|800|sang 1v, trua 1v, toi 1v|
+53U|Hapacol|4000|goi|200|sang 1 goi, toi 1 goi|
